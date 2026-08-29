@@ -1,21 +1,10 @@
-export default function Home() {
-  return (
-    <main className="min-h-screen flex items-center justify-center p-8">
-      <div className="max-w-xl text-center space-y-4">
-        <h1 className="text-4xl font-bold tracking-tight">vibe-stack-supabase</h1>
-        <p className="text-neutral-500">
-          Edit{" "}
-          <code className="bg-neutral-100 px-1.5 py-0.5 rounded text-sm">
-            app/page.tsx
-          </code>{" "}
-          to start building.
-        </p>
-        <p className="text-xs text-neutral-400">
-          See{" "}
-          <code className="bg-neutral-100 px-1.5 py-0.5 rounded">CLAUDE.md</code>{" "}
-          for project conventions and gstack workflow.
-        </p>
-      </div>
-    </main>
-  );
+import Link from "next/link";
+import { getDashboard } from "@/lib/data";
+import DashboardClient from "@/components/dashboard-client";
+
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const data = await getDashboard();
+  return <div className="app-shell"><aside className="sidebar"><div className="brand"><span className="brand-mark">S</span><div><strong>SmartMoney</strong><small>AI budget coach</small></div></div><nav><Link className="active" href="/">◈ <span>Dashboard</span></Link><Link href="/expenses">↗ <span>Expenses</span></Link><Link href="/budget">▣ <span>Budget</span></Link><Link href="/recommendations">✦ <span>Recommendations</span></Link></nav><div className="sidebar-note"><span>●</span> Demo mode<br /><small>Your data is saved to Supabase.</small></div></aside><main className="main-content"><DashboardClient initialData={data} /></main></div>;
 }
