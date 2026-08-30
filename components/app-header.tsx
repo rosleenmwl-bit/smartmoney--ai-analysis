@@ -3,11 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-
-const familyProfiles = [
-  "Rosleen",
-  ...Array.from({ length: 10 }, (_, index) => `Family member ${index + 1}`),
-];
+import type { FamilyProfile } from "@/lib/auth";
 
 export default function AppHeader({
   active,
@@ -15,6 +11,7 @@ export default function AppHeader({
 }: {
   active: "dashboard" | "expenses" | "recommendations";
   month?: string;
+  familyProfiles: FamilyProfile[];
 }) {
   const [profile, setProfile] = useState("Rosleen");
   const [accessCode, setAccessCode] = useState("");
@@ -52,8 +49,8 @@ export default function AppHeader({
       <details className="profile-menu">
         <summary><span className="profile-avatar">{profile.slice(0, 1)}</span><span><strong>{profile}&apos;s profile</strong><small>{profile === "Rosleen" ? "Personal profile" : "Future family profile"}</small></span><span aria-hidden="true">⌄</span></summary>
         <div className="profile-popover">
-          <label>Active profile<select value={profile} onChange={(event) => changeProfile(event.target.value)}>{familyProfiles.map((name) => <option key={name} value={name} disabled={name !== "Rosleen"}>{name}{name !== "Rosleen" ? " · future access" : ""}</option>)}</select></label>
-          <div className="family-code"><span>Family Access code</span><strong>{accessCode || "Creating…"}</strong><small>Reserved on this device. Secure cross-device sharing will activate with family sign-in.</small></div>
+          <label>Active profile<select value={profile} onChange={(event) => changeProfile(event.target.value)}>{familyProfiles.map((familyProfile) => <option key={familyProfile.id} value={familyProfile.name} disabled={!familyProfile.isOwner}>{familyProfile.name}{familyProfile.isOwner ? "" : ` · ${familyProfile.email}`}</option>)}</select></label>
+          <div className="family-code"><span>Family Access</span><strong>{familyProfiles.length > 1 ? `${familyProfiles.length - 1} family account${familyProfiles.length === 2 ? "" : "s"} found` : "No family accounts yet"}</strong><small>Family members sign in separately with their email and six-digit code.</small></div>
         </div>
       </details>
     </header>

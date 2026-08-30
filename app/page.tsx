@@ -1,7 +1,7 @@
 import { getDashboard } from "@/lib/data";
 import DashboardClient from "@/components/dashboard-client";
 import AppHeader from "@/components/app-header";
-import { requireAppUser } from "@/lib/auth";
+import { getFamilyProfiles, requireAppUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -10,5 +10,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ m
   const nextPath = params.month ? `/?month=${encodeURIComponent(params.month)}` : "/";
   await requireAppUser(nextPath);
   const data = await getDashboard(params.month);
-  return <div className="app-shell"><AppHeader active="dashboard" month={data.month} /><main className="main-content"><DashboardClient initialData={data} /></main></div>;
+  const familyProfiles = await getFamilyProfiles();
+  return <div className="app-shell"><AppHeader active="dashboard" month={data.month} familyProfiles={familyProfiles} /><main className="main-content"><DashboardClient initialData={data} /></main></div>;
 }
