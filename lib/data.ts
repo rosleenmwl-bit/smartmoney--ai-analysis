@@ -41,8 +41,9 @@ export async function ensureMonth(month = monthKey()) {
 }
 
 export async function getDashboard(month = monthKey()) {
-  const supabase = await createClient(); const { categories } = await ensureMonth(month); const bounds = monthBounds(month);
-  const [budgetRes, expenseRes, recRes] = await Promise.all([supabase.from("budgets").select("id,month,category_id,allocated_amount,is_total").eq("month", month), supabase.from("expenses").select("id,category_id,amount,expense_date,capture_method,note,created_at,categories(name,type,icon)").gte("expense_date", bounds.start).lt("expense_date", bounds.end).order("expense_date", { ascending: false }), supabase.from("recommendations").select("*,categories(name,icon)").eq("month", month).order("created_at", { ascending: false }).limit(1)]);
+  const currentMonth = /^\d{4}-\d{2}$/.test(month) ? month : monthKey();
+  const supabase = await createClient(); const { categories } = await ensureMonth(currentMonth); const bounds = monthBounds(currentMonth);
+  const [budgetRes, expenseRes, recRes] = await Promise.all([supabase.from("budgets").select("id,month,category_id,allocated_amount,is_total").eq("month", currentMonth), supabase.from("expenses").select("id,category_id,amount,expense_date,capture_method,note,created_at,categories(name,type,icon)").gte("expense_date", bounds.start).lt("expense_date", bounds.end).order("expense_date", { ascending: false }), supabase.from("recommendations").select("*,categories(name,icon)").eq("month", currentMonth).order("created_at", { ascending: false }).limit(1)]);
   if (budgetRes.error || expenseRes.error || !categories.length) {
     if (secureMode()) throw new Error("Unable to load your spending data from the database.");
     return includeSavedReceipt(buildDemoDashboard(month), month);
@@ -53,6 +54,6 @@ export async function getDashboard(month = monthKey()) {
   const fixedAllocated = comparisons.filter((c) => c.type === "fixed").reduce((s, c) => s + c.budget, 0);
   const fixedSpent = comparisons.filter((c) => c.type === "fixed").reduce((s, c) => s + c.actual, 0);
   const weekly = expenses.filter((e) => (e.categories as any)?.type !== "fixed").sort((a, b) => Number(b.amount) - Number(a.amount)).slice(0, 3);
-  return { month, categories, budgets, expenses, recommendation, allocated, spent, balance: allocated - spent, fixedAllocated, fixedSpent, flexibleSpent: spent - fixedSpent, comparisons, weekly, weekStart: startOfWeek() };
+  return { month: currentMonth, categories, budgets, expenses, recommendation, allocated, spent, balance: allocated - spent, fixedAllocated, fixedSpent, flexibleSpent: spent - fixedSpent, comparisons, weekly, weekStart: startOfWeek() };
 }
 export async function getCategories() { const supabase = await createClient(); const { data } = await supabase.from("categories").select("id,name,type,icon").order("sort_order"); return data ?? []; }
