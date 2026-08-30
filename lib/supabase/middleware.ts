@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 export async function updateSession(request: NextRequest) {
   const supabaseResponse = NextResponse.next({ request });
+  const authRequired = process.env.SMARTMONEY_AUTH_REQUIRED === "true";
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -34,8 +35,11 @@ export async function updateSession(request: NextRequest) {
       },
     });
 
-    // Refresh session so it doesn't expire while user is active
-    await supabase.auth.getUser();
+    // Refresh session so it doesn't expire while user is active.
+    const { data: { user } } = await supabase.auth.getUser();
+    if (authRequired && !user && !request.nextUrl.pathname.startsWith("/login") && !request.nextUrl.pathname.startsWith("/auth/callback")) {
+      return NextResponse.redirect(new URL(`/login?next=${encodeURIComponent(request.nextUrl.pathname)}`, request.url));
+    }
     return response;
   } catch {
     // Never let an auth hiccup crash the entire edge middleware

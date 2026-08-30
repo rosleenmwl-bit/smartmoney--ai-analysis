@@ -1,5 +1,11 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./preview.css";
+import "./dashboard.css";
+import "./summary.css";
+import "./shell.css";
+import "./expenses.css";
+import "./recommendation.css";
 
 export const metadata: Metadata = {
   title: "SmartMoney — AI budget coach",

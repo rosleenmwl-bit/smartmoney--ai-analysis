@@ -1,0 +1,133 @@
+@media (min-width: 1001px) {
+  .month-picker,
+  .header-budget-form label,
+  .budget-control {
+    max-width: 190px;
+    min-width: 190px;
+    width: 190px;
+  }
+
+  .budget-control input {
+    width: 130px;
+  }
+}
+
+.summary-label-row {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.summary-panel .summary-label {
+  display: inline-block;
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.summary-panel .info-tip {
+  align-items: center;
+  border: 1px solid #9aa1b8;
+  border-radius: 50%;
+  color: #69708d;
+  cursor: help;
+  display: inline-grid;
+  font-size: 10px;
+  height: 20px;
+  justify-content: center;
+  letter-spacing: 0;
+  position: relative;
+  text-transform: none;
+  width: 20px;
+}
+
+.summary-panel .info-popover {
+  background: #202342;
+  border-radius: 7px;
+  color: #fff;
+  display: none;
+  font-size: 11px;
+  font-weight: 600;
+  left: 50%;
+  letter-spacing: 0;
+  line-height: 1.35;
+  padding: 8px 10px;
+  position: absolute;
+  text-transform: none;
+  top: 27px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  z-index: 10;
+}
+
+.summary-panel .info-tip:hover .info-popover,
+.summary-panel .info-tip:focus .info-popover {
+  display: block;
+}
+
+.summary-panel > strong {
+  font-size: clamp(34px, 4vw, 46px);
+  margin: 22px 0 14px;
+  white-space: nowrap;
+}
+
+.summary-detail {
+  align-items: center;
+  color: var(--muted);
+  display: flex;
+  font-size: 12px;
+  gap: 9px;
+}
+
+.summary-panel .summary-detail span,
+.summary-panel .summary-scale span {
+  font-size: inherit;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.summary-panel .metric-badge {
+  background: #fff0b8;
+  border-radius: 6px;
+  color: #745b00;
+  padding: 7px 10px;
+}
+
+.summary-panel .progress {
+  margin-top: 20px;
+}
+
+.summary-panel .flexible-progress i {
+  background: linear-gradient(90deg, #ef809c, #b58cf0);
+}
+
+.summary-scale {
+  color: var(--muted);
+  display: flex;
+  font-size: 11px;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.summary-scale .positive {
+  color: var(--green);
+}
+
+.summary-scale .negative {
+  color: var(--red);
+}
+
+@media (max-width: 800px) {
+  .summary-detail {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .summary-panel .info-popover {
+    left: auto;
+    right: -8px;
+    transform: none;
+    white-space: normal;
+    width: 210px;
+  }
+}

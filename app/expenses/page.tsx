@@ -1,6 +1,11 @@
-import Link from "next/link";
+import AppHeader from "@/components/app-header";
+import ExpensesClient from "@/components/expenses-client";
 import { getDashboard } from "@/lib/data";
-import ExpenseForm from "@/components/expense-form";
-import { deleteExpense } from "@/app/actions";
+
 export const dynamic = "force-dynamic";
-export default async function ExpensesPage() { const d = await getDashboard(); return <div className="app-shell"><aside className="sidebar"><div className="brand"><span className="brand-mark">S</span><div><strong>SmartMoney</strong><small>AI budget coach</small></div></div><nav><Link href="/">◈ <span>Dashboard</span></Link><Link className="active" href="/expenses">↗ <span>Expenses</span></Link><Link href="/budget">▣ <span>Budget</span></Link><Link href="/recommendations">✦ <span>Recommendations</span></Link></nav></aside><main className="main-content"><header className="topbar"><div><p className="eyebrow">Expense tracker</p><h1>Every ringgit, accounted for.</h1></div><Link className="button secondary" href="/">← Dashboard</Link></header><section className="card"><div className="section-heading"><div><p className="eyebrow">Manual entry</p><h2>Add an expense</h2></div><span className="pill">MYR</span></div><ExpenseForm categories={d.categories} /></section><section className="card"><div className="section-heading"><div><p className="eyebrow">{d.month}</p><h2>Recent expenses</h2></div><strong>{d.expenses.length} entries</strong></div><div className="table-wrap"><table><thead><tr><th>Date</th><th>Category</th><th>Note</th><th>Method</th><th>Amount</th><th></th></tr></thead><tbody>{d.expenses.map((x: any) => <tr key={x.id}><td>{x.expense_date}</td><td>{x.categories?.icon} {x.categories?.name}</td><td>{x.note || "—"}</td><td><span className="pill">{x.capture_method}</span></td><td>MYR {Number(x.amount).toFixed(2)}</td><td><form action={deleteExpense.bind(null, x.id)}><button className="delete-button" title="Delete expense">Delete</button></form></td></tr>)}</tbody></table></div></section></main></div> }
+
+export default async function ExpensesPage({ searchParams }: { searchParams: Promise<{ month?: string }> }) {
+  const params = await searchParams;
+  const data = await getDashboard(params.month);
+  return <div className="app-shell"><AppHeader active="expenses" month={data.month} /><main className="main-content expenses-content"><ExpensesClient data={data} /></main></div>;
+}
