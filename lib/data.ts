@@ -33,7 +33,36 @@ export async function ensureMonth(month = monthKey()) {
   const { data: fixedRows } = await supabase.from("expenses").select("category_id").gte("expense_date", bounds.start).lt("expense_date", bounds.end).in("category_id", cats.filter((category) => category.type === "fixed").map((category) => category.id));
   const fixedIds = new Set((fixedRows ?? []).map((row) => row.category_id));
   const missingFixed = cats.filter((category) => category.type === "fixed" && !fixedIds.has(category.id));
-  if (missingFixed.length) await supabase.from("expenses").insert(missingFixed.map((category) => ({ category_id: category.id, amount: DEFAULT_BUDGETS[category.name] ?? 0, expense_date: `${month}-01`, capture_method: "manual", note: `Monthly ${category.name}` })).filter((expense) => expense.amount > 0));
+  if (missingFixed.length) {
+    // A new month inherits the latest saved fixed amount for each category.
+    // This keeps owner-edited recurring values consistent across months while
+    // leaving flexible spending empty until the owner adds an expense.
+    const fixedCategoryIds = missingFixed.map((category) => category.id);
+    const { data: priorFixedRows } = await supabase
+      .from("expenses")
+      .select("category_id,amount,expense_date,created_at")
+      .lt("expense_date", bounds.start)
+      .in("category_id", fixedCategoryIds)
+      .order("expense_date", { ascending: false })
+      .order("created_at", { ascending: false });
+    const latestByCategory = new Map<string, number>();
+    for (const row of priorFixedRows ?? []) {
+      if (!latestByCategory.has(row.category_id)) latestByCategory.set(row.category_id, Number(row.amount));
+    }
+    const recurringRows = missingFixed
+      .map((category) => ({
+        category_id: category.id,
+        amount: latestByCategory.get(category.id) ?? DEFAULT_BUDGETS[category.name] ?? 0,
+        expense_date: bounds.start,
+        capture_method: "manual",
+        note: `Monthly ${category.name}`,
+      }))
+      .filter((expense) => expense.amount > 0);
+    if (recurringRows.length) {
+      const { error: recurringError } = await supabase.from("expenses").insert(recurringRows);
+      if (recurringError) throw new Error("Unable to create the recurring fixed expenses for this month.");
+    }
+  }
   // Demo expenses belong to the public preview only. In owner mode an empty
   // month is a legitimate state and must never be populated on page load.
   if (!secureMode() && !expenses?.length) { await supabase.from("expenses").insert([["Restaurant Meals", 85, "Family dinner"], ["Restaurant Meals", 42, "Lunch with friend"], ["Grocery Shopping", 230, "Weekly groceries"], ["Car Expenses", 60, "Petrol refill"]].map(([name, amount, note], i) => ({ category_id: byName[name as string], amount, expense_date: `${month}-${String(Math.min(27, 6 + i * 4)).padStart(2, "0")}`, capture_method: "manual", note })) ); }
