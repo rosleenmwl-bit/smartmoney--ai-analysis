@@ -8,26 +8,17 @@ import type { FamilyProfile } from "@/lib/auth";
 export default function AppHeader({
   active,
   month,
+  familyProfiles,
 }: {
   active: "dashboard" | "expenses" | "recommendations";
   month?: string;
   familyProfiles: FamilyProfile[];
 }) {
   const [profile, setProfile] = useState("Rosleen");
-  const [accessCode, setAccessCode] = useState("");
 
   useEffect(() => {
     const savedProfile = window.localStorage.getItem("smartmoney-active-profile");
-    if (savedProfile && familyProfiles.includes(savedProfile)) setProfile(savedProfile);
-
-    let savedCode = window.localStorage.getItem("smartmoney-family-code");
-    if (!savedCode) {
-      const values = new Uint16Array(2);
-      window.crypto.getRandomValues(values);
-      savedCode = `SM-${String(values[0] % 10000).padStart(4, "0")}-${String(values[1] % 10000).padStart(4, "0")}`;
-      window.localStorage.setItem("smartmoney-family-code", savedCode);
-    }
-    setAccessCode(savedCode);
+    if (savedProfile && familyProfiles.some((familyProfile) => familyProfile.name === savedProfile)) setProfile(savedProfile);
   }, []);
 
   function changeProfile(nextProfile: string) {
@@ -50,7 +41,6 @@ export default function AppHeader({
         <summary><span className="profile-avatar">{profile.slice(0, 1)}</span><span><strong>{profile}&apos;s profile</strong><small>{profile === "Rosleen" ? "Personal profile" : "Future family profile"}</small></span><span aria-hidden="true">⌄</span></summary>
         <div className="profile-popover">
           <label>Active profile<select value={profile} onChange={(event) => changeProfile(event.target.value)}>{familyProfiles.map((familyProfile) => <option key={familyProfile.id} value={familyProfile.name} disabled={!familyProfile.isOwner}>{familyProfile.name}{familyProfile.isOwner ? "" : ` · ${familyProfile.email}`}</option>)}</select></label>
-          <div className="family-code"><span>Family Access</span><strong>{familyProfiles.length > 1 ? `${familyProfiles.length - 1} family account${familyProfiles.length === 2 ? "" : "s"} found` : "No family accounts yet"}</strong><small>Family members sign in separately with their email and six-digit code.</small></div>
         </div>
       </details>
     </header>
