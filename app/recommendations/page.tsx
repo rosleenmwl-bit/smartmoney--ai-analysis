@@ -2,6 +2,7 @@ import Link from "next/link";
 import AppHeader from "@/components/app-header";
 import { getDashboard } from "@/lib/data";
 import { generateRecommendation, updateRecommendation } from "@/app/actions";
+import { requireAppUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +17,7 @@ function actionDefinition(action: string) {
 
 export default async function RecommendationsPage({ searchParams }: { searchParams: Promise<{ month?: string }> }) {
   const params = await searchParams;
+  await requireAppUser(`/recommendations?month=${encodeURIComponent(params.month ?? "")}`);
   const d = await getDashboard(params.month);
   const r = d.recommendation;
   const topFlexible = d.comparisons.filter((x: any) => x.type !== "fixed" && x.actual > 0).sort((a: any, b: any) => b.actual - a.actual)[0];

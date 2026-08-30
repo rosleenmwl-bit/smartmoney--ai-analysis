@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
+import { getAppUser } from "@/lib/auth";
 
 export async function POST(request: Request) {
+  if (process.env.SMARTMONEY_AUTH_REQUIRED === "true" && !(await getAppUser())) {
+    return NextResponse.json({ error: "Sign in is required." }, { status: 401 });
+  }
   const formData = await request.formData();
   const file = formData.get("file");
   if (!(file instanceof File)) return NextResponse.json({ error: "Select a receipt image first." }, { status: 400 });
