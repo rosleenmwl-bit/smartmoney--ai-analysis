@@ -7,7 +7,8 @@ export const dynamic = "force-dynamic";
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ month?: string }> }) {
   const params = await searchParams;
-  await requireAppUser(`/?month=${encodeURIComponent(params.month ?? "")}`);
+  const nextPath = params.month ? `/?month=${encodeURIComponent(params.month)}` : "/";
+  await requireAppUser(nextPath);
   const data = await getDashboard(params.month);
   return <div className="app-shell"><AppHeader active="dashboard" month={data.month} /><main className="main-content"><DashboardClient initialData={data} /></main></div>;
 }
